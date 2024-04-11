@@ -97,4 +97,80 @@ app.post('/register', function (req, res){
     });
 });
 
+app.post ('/log', function (req,res) {
+    let email = req.body.email;
+    let pass = req.body.pass;
+
+    let con = conectiondb();
+    let query = `SELECT * FROM users WHERE pass = ? AND email like ?`
+
+    con.query(query, [pass, email], function (err, results){
+        if(results.length > 0){
+            req.session.user= email; // sessão de identificação
+            console.log('Login efetuado com sucesso!');
+            res.render('views/home', {message: results})
+        }else{
+            let message = 'Login incorreto'
+            res.render('views/login', {message: message})
+        }
+    })
+})
+app.post('/update', function(req,res){
+    console.log('entrou')
+
+    let username = req.body.nome;
+    let pass = req.body.pwd;
+    let email = req.body.email;
+    let idade = req.body.idade;
+
+    let con = conectiondb();
+
+    let query = `UPDATE users SET username = ?, pass = ?, idade = ? WHERE email LIKE ?`;
+
+    con.query(query, [username, pass, idade, req.session.user], function(err, results){
+        let query2 = `SELECT * FROM users WHERE email LIKE ?`
+        con.query(query2, [req.session.user], function(err, results){
+            res.render('views/home', {message: results})
+        })
+    })
+})
+
+app.post('/delete', function(req, res){
+    let username = req.body.nome;
+
+    let con = conectiondb();
+
+    let query = `DELETE FROM users WHERE email LIKE ?`
+
+    
+    con.query(query,[req.session.user], function(err, results){
+        res.redirect('/')
+    } )
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.listen(8081, () => console.log(`App listening on port!`));
